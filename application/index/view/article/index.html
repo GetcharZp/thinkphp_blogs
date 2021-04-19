@@ -1,0 +1,211 @@
+{extend name="base" /}
+{block name="title"}
+博客 - 文章管理
+{/block}
+{block name="content"}
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal" id="add"
+        style="margin-bottom: 10px;">
+    新增
+</button>
+<!--文章新增-->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">新增文章</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="add-title">文章标题</label>
+                        <input type="text" class="form-control" id="add-title" aria-describedby="emailHelp">
+                    </div>
+                    <div class="form-group">
+                        <label >文章分类</label>
+                        {foreach $cates as $cate}
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="cid{$cate['id']}" name="cid" class="custom-control-input add-cid" value="{$cate['id']}">
+                            <label class="custom-control-label" for="cid{$cate['id']}">{$cate['name']}</label>
+                        </div>
+                        {/foreach}
+                    </div>
+                    <div class="form-group">
+                        <label for="add-content">文章正文</label>
+                        <div id="add-content"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="add-save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--文章新增 END-->
+
+<!--文章编辑-->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="">文章编辑</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label for="edit-title">分类名称</label>
+                        <input type="text" class="form-control" id="edit-title" aria-describedby="emailHelp">
+                    </div>
+                    <div class="form-group">
+                        <label >文章分类</label>
+                        {foreach $cates as $cate}
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" id="edit-cid{$cate['id']}" name="edit-cid" class="custom-control-input edit-cid" value="{$cate['id']}">
+                            <label class="custom-control-label" for="edit-cid{$cate['id']}">{$cate['name']}</label>
+                        </div>
+                        {/foreach}
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-content">文章正文</label>
+                        <div id="edit-content"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="edit-save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--文章编辑 END-->
+
+<!--文章列表-->
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">标题</th>
+        <th scope="col">阅读次数</th>
+        <th scope="col">创建时间</th>
+        <th scope="col">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {foreach $articles as $article}
+    <tr>
+        <th>{$article['id']}</th>
+        <th>{$article['title']}</th>
+        <th>{$article['num']}</th>
+        <th>{:date('Y-m-d H:i:s', $article['create_time'])}</th>
+        <th>
+            <a href="javascript:;" class="btn btn-sm btn-primary edit" data-id="{$article['id']}">修改</a>
+            <a href="javascript:;" class="btn btn-danger btn-sm delete" data-id="{$article['id']}">删除</a>
+        </th>
+    </tr>
+    {/foreach}
+    </tbody>
+</table>
+{$articles->render()}
+<!--文章列表 END-->
+
+<script>
+    var add_quill = new Quill('#add-content', {
+        theme: 'snow'
+    });
+    var edit_quill = new Quill('#edit-content', {
+        theme: 'snow'
+    });
+
+    $('#add-save').on('click', function () {
+        let title = $('#add-title').val();
+        if (title === '') {
+            return zpAlert("文章标题不能为空");
+        }
+
+        let cateObjs = $(".add-cid");
+        let cateObj = "";
+        for (let i = 0; i < cateObjs.length; ++i) {
+            if (cateObjs[i].checked) {
+                cateObj = cateObjs[i];
+            }
+        }
+        if (cateObj === "") {
+            return zpAlert("分类未选择");
+        }
+        let cid = cateObj.value;
+
+        let text = add_quill.getText();
+        let content = add_quill.root.innerHTML;
+        if (text.trim() === "") {
+            return zpAlert("正文不能为空");
+        }
+        console.log(text);
+
+        $.post("{:url('/index/article/add')}", {title: title, cid: cid, text: text, content: content}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/article/index')}";
+            }
+        });
+    });
+
+    $('.delete').on('click', function () {
+        let id = $(this).data('id');
+        if (confirm("确认删除该文章？")) {
+            $.get("{:url('/index/article/delete')}", {id: id}, res => {
+                if (res.code !== 200) {
+                    zpAlert(res.msg);
+                } else {
+                    location.href = "{:url('/index/article/index')}";
+                }
+            });
+        }
+    });
+
+    $('.edit').on('click', function () {
+        let id = $(this).data('id');
+        $('#edit-id').val(id);
+        $.get("{:url('/index/article/detail')}", {id: id}, res => {
+            if (res.code === 200) {
+                zpAlert(res.msg);
+                $('#edit-title').val(res.article.title);
+                $('#edit-cid' + res.article.cid).prop("checked", "checked");
+                edit_quill.root.innerHTML = res.article.content
+            }
+        });
+        $('#editModal').modal('show');
+    });
+
+    $('#edit-save').on('click', function () {
+        let id = $('#edit-id').val();
+        let title = $('#edit-title').val();
+        if (title === '') {
+            return zpAlert("文章标题不能为空");
+        }
+        let cid = $("input[name='edit-cid']:checked").val();
+        let content = edit_quill.root.innerHTML;
+        let text = edit_quill.getText();
+        if (text.trim() === "") {
+            return zpAlert("正文不能为空");
+        }
+
+        $.post("{:url('/index/article/edit')}", {id: id, title: title, cid: cid, content: content, text: text}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/article/index')}";
+            }
+        });
+    });
+</script>
+{/block}

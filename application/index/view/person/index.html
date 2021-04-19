@@ -1,0 +1,59 @@
+{extend name="base" /}
+{block name="title"} BLog - 个人信息 {/block}
+{block name="content"}
+<div class="zp-main">
+    <div class="form-group">
+        <label for="name">用户名</label>
+        <input type="text" class="form-control" id="name" value="{$user['name']}">
+    </div>
+    <div class="form-group">
+        <label for="newPassword">新密码</label>
+        <input type="password" class="form-control" id="newPassword" value="{$user['password']}">
+    </div>
+    <div class="form-group">
+        <label for="confirmPassword">确认密码</label>
+        <input type="password" class="form-control" id="confirmPassword" value="{$user['password']}">
+    </div>
+    <button type="submit" class="btn btn-primary" onclick="edit()">提交</button>
+</div>
+
+<div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <strong class="mr-auto" style="margin-right: 45px !important;">提示</strong>
+            <small>now</small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"
+                    style="text-align: right">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            <span id="msg">Test</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function zpAlert(msg) {
+        $('#msg').text(msg);
+        $('.toast').toast('show');
+    }
+
+    function edit() {
+        let name = $('#name').val();
+        let newPassword = $('#newPassword').val();
+        let confirmPassword = $('#confirmPassword').val();
+        if (name === "") {
+            zpAlert("用户名不能为空");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            zpAlert("两次输入的密码不一致");
+            return;
+        }
+        $.post('{:url("/index/person/index")}', {name: name, password: newPassword}, () => {
+            location.href = "{:url('/index/person/index')}";
+        });
+    }
+</script>
+{/block}

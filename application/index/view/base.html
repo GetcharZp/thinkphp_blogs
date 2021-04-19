@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link href="/static/css/quill.snow.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/quill.js"></script>
+    <title>{block name="title"} Blog Title {/block}</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{:url('/index/index/index')}">{:session('conf.copyright')}</a>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            {if empty(session('user.name'))}
+            <li class="nav-item dropdown">
+                <a class="nav-link" href="{:url('/index/login/index')}">
+                    登录
+                </a>
+            </li>
+            {else/}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {:session('user.name')}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" href="javascript:;" onclick="loginOut()">退出登录</a>
+                    <a class="dropdown-item" href="{:url('/index/person/index')}">个人信息</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="javascript:;" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    管理
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" href="{:url('/index/cate/index')}">分类管理</a>
+                    <a class="dropdown-item" href="{:url('/index/article/index')}">文章管理</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="javascript:;" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    设置
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" href="{:url('/index/set/copyright')}">版权管理</a>
+                </div>
+            </li>
+            {/if}
+        </ul>
+    </div>
+    <form class="form-inline" onsubmit="return false;">
+        <input class="form-control mr-sm-2" id="kw" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0 article-search" type="submit" id="search">搜索</button>
+    </form>
+</nav>
+<div class="zp-container row justify-content-md-center">
+    <div class="col col-lg-9">
+        {block name="content"} Content {/block}
+    </div>
+</div>
+<!--提示模板-->
+<div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <strong class="mr-auto" style="margin-right: 45px !important;">提示</strong>
+            <small>now</small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"
+                    style="text-align: right">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            <span id="msg">Test</span>
+        </div>
+    </div>
+</div>
+<!--提示模板 END-->
+<script>
+    $('.pagination li').addClass('page-item');
+    $('.pagination li a, span').addClass('page-link');
+
+    function loginOut() {
+        if (confirm('确认退出登录么？')) {
+            $.post('{:url("/index/login/out")}', {}, (res) => {
+                if (res.code === 200) {
+                    location.href = "{:url('/index/index/index')}";
+                }
+            })
+        }
+    }
+
+    // 提示方法
+    function zpAlert(msg) {
+        $('#msg').text(msg);
+        $('.toast').toast('show');
+    }
+    
+    // search click 监听
+    $('#search').on('click', function () {
+        let kw = $('#kw').val();
+        if (kw === "") {
+            location.href = "{:url('/index/index/index')}"
+        } else {
+            location.href = "{:url('/index/search/index')}?kw=" + kw;
+        }
+    })
+</script>
+<footer>
+    @CopyRight {:session('conf.copyright')}
+</footer>
+</body>
+</html>

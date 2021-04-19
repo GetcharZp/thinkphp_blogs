@@ -1,0 +1,139 @@
+{extend name="base" /}
+{block name="title"}
+博客 - 分类管理
+{/block}
+{block name="content"}
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal" id="add"
+        style="margin-bottom: 10px;">
+    新增
+</button>
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">新增分类</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="name">分类名称</label>
+                        <input type="text" class="form-control" id="name" aria-describedby="emailHelp">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="add-save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="">分类编辑</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label for="edit-name">分类名称</label>
+                        <input type="text" class="form-control" id="edit-name" aria-describedby="emailHelp">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="edit-save">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">分类名称</th>
+        <th scope="col">使用次数</th>
+        <th scope="col">创建时间</th>
+        <th scope="col">修改时间</th>
+        <th scope="col">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    {foreach $cates as $cate}
+    <tr>
+        <th>{$cate['id']}</th>
+        <th>{$cate['num']}</th>
+        <th>{$cate['name']}</th>
+        <th>{:date('Y-m-d H:i:s', $cate['create_time'])}</th>
+        <th>{:date('Y-m-d H:i:s', $cate['update_time'])}</th>
+        <th>
+            <a href="javascript:;" class="btn btn-sm btn-primary edit" data-id="{$cate['id']}"
+               data-name="{$cate['name']}">修改</a>
+            <a href="javascript:;" class="btn btn-danger btn-sm delete" data-id="{$cate['id']}">删除</a>
+        </th>
+    </tr>
+    {/foreach}
+    </tbody>
+</table>
+{$cates->render()}
+
+<script>
+    $('#add-save').on('click', function () {
+        let name = $('#name').val();
+        if (name === '') {
+            zpAlert("分类名称不能为空");
+        }
+        $.post("{:url('/index/cate/add')}", {name: name}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/cate/index')}";
+            }
+        });
+    });
+
+    $('.delete').on('click', function () {
+        let id = $(this).data('id');
+        if (confirm("确认删除该分类？")) {
+            $.get("{:url('/index/cate/delete')}", {id: id}, res => {
+                if (res.code !== 200) {
+                    zpAlert(res.msg);
+                } else {
+                    location.href = "{:url('/index/cate/index')}";
+                }
+            });
+        }
+    });
+
+    $('.edit').on('click', function () {
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+        $('#edit-id').val(id);
+        $('#edit-name').val(name);
+        $('#editModal').modal('show');
+    });
+
+    $('#edit-save').on('click', function () {
+        let id = $('#edit-id').val();
+        let name = $('#edit-name').val();
+        $.post("{:url('/index/cate/edit')}", {id: id, name: name}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/cate/index')}";
+            }
+        });
+    });
+</script>
+{/block}

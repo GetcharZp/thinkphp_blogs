@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <style>
+        .zp-main {
+            width: 30%;
+            margin: 200px auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
+    <title>登录</title>
+</head>
+<body>
+<!--提示模板-->
+<div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <strong class="mr-auto" style="margin-right: 45px !important;">提示</strong>
+            <small>now</small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"
+                    style="text-align: right">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            <span id="msg">Test</span>
+        </div>
+    </div>
+</div>
+<!--提示模板 END-->
+
+<div class="zp-main">
+    <div class="form-group">
+        <label for="name">用户名</label>
+        <input type="text" class="form-control" id="name">
+    </div>
+    <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" class="form-control" id="password">
+    </div>
+    <button type="submit" class="btn btn-primary" onclick="login()">登录</button>
+</div>
+
+<script>
+    function zpAlert(msg) {
+        $('#msg').text(msg);
+        $('.toast').toast('show');
+    }
+
+
+    function login() {
+        let name = $('#name').val();
+        let password = $('#password').val();
+        if (name === "") {
+            zpAlert("用户名不能为空");
+            return
+        }
+        if (password === "") {
+            zpAlert("密码不能为空");
+            return
+        }
+        $.post("{:url('/index/login/index')}", {name: name, password: password}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/index/index')}";
+            }
+        });
+    }
+</script>
+</body>
+</html>

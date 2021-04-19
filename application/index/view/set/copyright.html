@@ -1,0 +1,26 @@
+{extend name="base" /}
+{block name="title"}
+博客 - 版权管理
+{/block}
+{block name="content"}
+<div class="form-group">
+    <label for="copyright">版权名称</label>
+    <input type="text" class="form-control" id="copyright" value="{$conf['copyright']}">
+</div>
+<button type="submit" class="btn btn-primary save">保存</button>
+<script>
+    $('.save').on('click', function () {
+        let copyright = $('#copyright').val();
+        if (copyright === "") {
+            zpAlert('版权信息不能为空');
+        }
+        $.post("{:url('/index/set/copyright')}", {copyright: copyright}, res => {
+            if (res.code !== 200) {
+                zpAlert(res.msg);
+            } else {
+                location.href = "{:url('/index/set/copyright')}";
+            }
+        });
+    });
+</script>
+{/block}

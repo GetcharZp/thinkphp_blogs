@@ -1,0 +1,13 @@
+{extend name="base" /}
+{block name="title"}
+博客 - 详情 - {$article['title']}
+{/block}
+{block name="content"}
+<div class="card" style="margin-bottom: 10px">
+    <h5 class="card-header">{$article['title']} 【阅读次数：{$article['num']}】</h5>
+    <div class="card-body">
+        <p class="card-text">{$article['content']}</p>
+        <p class="card-text">【发布日期： {:date("Y-m-d", $article['create_time'])}】</p>
+    </div>
+</div>
+{/block}

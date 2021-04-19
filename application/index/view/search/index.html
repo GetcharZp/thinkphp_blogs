@@ -1,0 +1,19 @@
+{extend name="base" /}
+{block name="title"}
+博客 - 搜索
+{/block}
+{block name="content"}
+{if empty($articles)}
+<h2>暂无相关数据。。</h2>
+{else /}
+{foreach $articles as $article}
+<div class="card" style="margin-bottom: 10px">
+    <h5 class="card-header">{$article['_source']['title']}</h5>
+    <div class="card-body">
+        <p class="card-text">{$article['highlight']['content'][0]}</p>
+        <a href="{:url('/index/index/detail')}?id={$article['_id']}" class="btn btn-primary more">More</a>
+    </div>
+</div>
+{/foreach}
+{/if}
+{/block}
